@@ -106,11 +106,9 @@ class AIPairProgrammer(QWidget):
     def send_query(self):
         # Add history handling here
         query = self.query_edit.toPlainText()
-        print(f'Query: {query}')
         if query:
             response_text = self.query_gpt(query)
             if response_text:
-                print(f'Saving history')
                 self.historian.add(query=query, response=response_text)
                 self.add_response_text(response_text)
             else:
@@ -125,7 +123,7 @@ class AIPairProgrammer(QWidget):
             openai.api_key = self.api_key
         else:
             new_text = 'You must set your API key before querying ChatGPT!'
-            self.add_response(new_text)
+            self.add_response_text(new_text)
 
         # Make Query Request
         try:
@@ -146,7 +144,7 @@ class AIPairProgrammer(QWidget):
             else:
                 return "Error"
         except Exception as e:
-            return e.__str__()
+            return "Error: " + e.__str__()
 
     def add_response_text(self, new_text: str = ''):
         curr_text = self.response_edit.toPlainText()

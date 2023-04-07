@@ -25,9 +25,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     dependencies=[
-
+        "configparser", "openai"
     ],
     package_dir={"aipairprogrammer": ""},
     packages=find_packages(where="./aipairprogrammer"),
+    extras_required=dict(tests=["pytest"]),
     python_requires=">=3.7"
 )

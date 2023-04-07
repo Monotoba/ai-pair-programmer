@@ -9,6 +9,9 @@ class AIPairProgrammerSettings:
         self.api_key = ""
         self.model_name = ""
 
+    def settings_filename(self, filename: str):
+        self.filename = filename
+
     def getState(self):
         return self
 
