@@ -3,7 +3,7 @@
 
 Version 0.0.1 2023-04-04
 - More information can be found in the docs directory in the [README.md](https://github.com/Monotoba/ai-pair-programmer/blob/main/docs/USERGUIDE.md) file.
-- Information on changes to the software can be found in the [CHANGELOG](https://github.com/Monotoba/api-pair-programmer/blob/main/CHANGELOG.md) file 
+- Information on changes to the software can be found in the [CHANGELOG](https://github.com/Monotoba/ai-pair-programmer/blob/main/CHANGELOG.md) file 
 located at the root of the project.
 - This software has a very permissible MIT license found in the LICENSE.md file.
 - If you like this applet and find it helpful, let me know.
