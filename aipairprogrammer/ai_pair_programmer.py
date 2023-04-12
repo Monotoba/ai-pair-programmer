@@ -30,7 +30,7 @@ class AIPairProgrammer(QWidget):
         self.init_ui()
 
     def init_system(self):
-        self.settings.loadState()
+        self.settings.load_state()
         self.api_key = self.settings.api_key
         self.current_model = self.settings.model_name
 
@@ -101,7 +101,7 @@ class AIPairProgrammer(QWidget):
     def update_model(self, index):
         self.current_model = self.models[self.model_keys[index]]
         self.settings.model_name = self.current_model
-        self.settings.saveState()
+        self.settings.save_state()
 
     def send_query(self):
         # Add history handling here
@@ -195,5 +195,5 @@ class AIPairProgrammer(QWidget):
             api_key = dialog.input_field.text()
             # Set and Save API Key
             self.settings.api_key = api_key
-            self.settings.saveState()
+            self.settings.save_state()
             self.api_key = api_key
