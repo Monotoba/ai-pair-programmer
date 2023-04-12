@@ -164,4 +164,4 @@ cython_debug/
 .idea/
 
 # Hide API Key used for testing
-/aipairprogrammer/secret/
+.secret/settings.ini
