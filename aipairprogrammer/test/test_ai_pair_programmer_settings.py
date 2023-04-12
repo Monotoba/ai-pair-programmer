@@ -11,7 +11,8 @@ from aipairprogrammer.ai_pair_programmer_settings import AIPairProgrammerSetting
 def settings():
     # Instantiate the settings object for use in tests
     cwd = os.getcwd()
-    settings = AIPairProgrammerSettings(filename=f"{cwd}/.secret/example_settings.ini")
+    filename = f"{cwd}/.secret/example_settings.ini"
+    settings = AIPairProgrammerSettings(filename=filename)
     return settings
 
 
@@ -22,7 +23,8 @@ def test_get_state(settings):
 
 def test_settings_filename(settings):
     # Manually set settings file name
-    filename = "../../.secret/example_settings.ini"
+    cwd = os.getcwd()
+    filename = f"{cwd}/.secret/example_settings.ini"
     settings.settings_filename(filename=filename)
     assert settings.filename == filename
 
