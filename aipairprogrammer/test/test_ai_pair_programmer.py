@@ -28,7 +28,7 @@ def test_update_model(app):
 
 def test_query_gpt(app):
     # Get our testing api key
-    app.settings.filename = '../secret/settings.ini'
+    app.settings.filename = '../../.secret/settings.ini'
     app.settings.loadState()
     app.api_key = app.settings.get_api_key()
     # Now we can make the api call
