@@ -47,14 +47,6 @@ class CustomDialog(QDialog):
         # Set the layout for the dialog
         self.setLayout(layout)
 
-    # def accept(self):
-    #     self.textEntered.emit(self.input_field.text())
-    #     super().accept()
-    #
-    # def reject(self):
-    #     self.dialogClosed.emit()
-    #     super().reject()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

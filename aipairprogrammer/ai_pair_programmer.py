@@ -110,6 +110,7 @@ class AIPairProgrammer(QWidget):
             response_text = self.query_gpt(query)
             if response_text:
                 self.historian.add(query=query, response=response_text)
+                self.historian.save_history()
                 self.add_response_text(response_text)
             else:
                 self.add_response_text(response_text)
@@ -197,3 +198,9 @@ class AIPairProgrammer(QWidget):
             self.settings.api_key = api_key
             self.settings.save_state()
             self.api_key = api_key
+
+    def load_history(self):
+        self.historian.load_history()
+
+    def save_history(self):
+        self.historian.save_history()
