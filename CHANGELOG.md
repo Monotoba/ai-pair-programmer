@@ -1,7 +1,29 @@
 # AI Pair Programmer
 ## Change Log
 
-0.0.2 2023-04-4 - Renamed Branch name to main
+0.0.6 2023-04-12
+- Changed test_ai_pair_programmer_settings.py to make use of example_settings.ini more consistent with.
+- Added is_in_bounds() and limit() methods to QueryHistory class.
+- Changed some method names to match proper python formatting.
+- Added history.dat to .gitignore file.
+- Updated CHANGELOG.
+
+0.0.5 2023-04-11
+- Added .secret directory.
+- Added example_settings.ini.
+- Added settings.ini to .gitignore file.
+- Converted api key and model_name in ai_pair_programmer_settings.py to properties.
+- Renamed loadState and saveState in ai_pair_programmer_settings.py to load_state and save_state respectively.
+
+0.0.4 2023-04-07
+- Fixed links in README.md file.
+- Started adding tests to test_ai_pair_programmer_settings.py file.
+
+0.0.3 2023-04-07
+- Added test files to test directory.
+- Added pytest-qt as test dependency.
+
+0.0.2 2023-04-04 - Renamed Branch name to main
 - Renamed local repo master branch to main. This
 
 0.0.1 2023-04-03 - Initial Release:
