@@ -1,6 +1,11 @@
 # AI Pair Programmer
 ## Change Log
 
+0.0.7 2023-04-15
+- Added test/historytest.txt (test history data file) to .gitignore
+- Added tests to test_query_history.py.
+- Changed method name of QueryHistory.empty_history() to QueryHistory.clear().
+
 0.0.6 2023-04-12
 - Changed test_ai_pair_programmer_settings.py to make use of example_settings.ini more consistent with.
 - Added is_in_bounds() and limit() methods to QueryHistory class.

@@ -166,3 +166,4 @@ cython_debug/
 # Hide API Key used for testing
 .secret/settings.ini
 history.dat
+/aipairprogrammer/test/historytest.txt
