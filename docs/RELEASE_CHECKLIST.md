@@ -1,7 +1,7 @@
-# 0.1.0a1 alpha candidate
+# 0.1.0a1 experimental alpha
 
-This candidate is experimental. Version metadata does not mean a GitHub
-release has been published. PyPI publication remains out of scope.
+Published on 2026-10-08 as a [GitHub prerelease](https://github.com/Monotoba/ai-pair-programmer/releases/tag/v0.1.0a1).
+PyPI publication remains out of scope.
 
 ## Completed offline checks
 
@@ -10,10 +10,13 @@ release has been published. PyPI publication remains out of scope.
 - Real Qt widget rendered offscreen; README screenshot uses labeled sample data.
 - Wheel and source distribution built; wheel installed and started outside
   the checkout, with a history round trip in an isolated temporary directory.
-- Six CI jobs cover Python 3.10/3.12 on Linux, Windows, and macOS. Check the
-  candidate PR and post-merge run for their actual result before publishing.
+- All six candidate PR and post-merge CI jobs passed, covering Python 3.10/3.12
+  on Linux, Windows, and macOS.
 - BSD-2-Clause license, build/language/GUI/status badges, contribution guide,
   upgrade notes, troubleshooting, and roadmap included.
+
+- GitHub prerelease published with wheel, source archive, and SHA-256 checksums;
+  uploaded package digests matched the local checksums.
 
 ## Outstanding validation
 
@@ -22,12 +25,12 @@ release has been published. PyPI publication remains out of scope.
 - A small live request using an explicitly configured test account and model,
   followed by checking response rendering and saved history. No live request
   has been made; API access, model availability, and billing remain unverified.
-- GitHub alpha publication with wheel, source archive, and SHA-256 checksums.
+
 
 A release must be marked as a prerelease and clearly state the outstanding
 validation. Do not present the candidate as production-ready or live-validated.
 
-## Suggested alpha release notes
+## Alpha release summary
 
 Experimental PyQt5 programming assistant with the OpenAI Responses API,
 editable model IDs, responsive background requests, and local cancellation.
