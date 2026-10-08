@@ -1,3 +1,13 @@
+# Unreleased cleanup
+
+- Repair install metadata, runtime dependencies, and GUI launch commands.
+- Add isolated offline tests, wheel smoke checks, and a six-job CI matrix.
+- Fix missing history and custom persistence paths; save on normal exit.
+- Stop query/response/key debug logging; mask the configuration key and
+  avoid requests when no real key is set.
+- Document work-in-progress status and API/persistence release blockers.
+- Adopt BSD-2-Clause for this cleanup.
+
 # AI Pair Programmer
 ## Change Log
 

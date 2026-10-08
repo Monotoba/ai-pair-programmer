@@ -1,6 +1,6 @@
 import datetime
 import pickle
-import os
+from pathlib import Path
 
 
 class HistoryItem:
@@ -94,17 +94,14 @@ class QueryHistory:
         self.current_index = 0
 
     def save_history(self):
-        cwd = os.getcwd()
-        filename = f"{cwd}/{self.history_filename}"
-        with open(filename, 'wb') as ofh:
+        with Path(self.history_filename).open('wb') as ofh:
             pickle.dump(self.history, ofh)
 
     def load_history(self):
-        cwd = os.getcwd()
-        filename = f"{cwd}/{self.history_filename}"
-        if os.path.exists(filename):
-            with open(self.history_filename, 'rb') as ifh:
+        filename = Path(self.history_filename)
+        if filename.exists():
+            with filename.open('rb') as ifh:
                 self.history = pickle.load(ifh)
         else:
-            # No history file so, initialize an empty history dict.
-            self.history = {}
+            self.history = []
+        self.current_index = self.limit(self.current_index)
