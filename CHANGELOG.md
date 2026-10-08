@@ -1,3 +1,13 @@
+# Unreleased API modernization
+
+- Replace the legacy Completion API with a per-request Responses client.
+- Upgrade to OpenAI SDK 2.x; use a 30-second timeout and no automatic retries.
+- Accept and restore an editable model ID without choosing one automatically.
+- Prefer environment API keys without copying them into settings.
+- Sanitize API errors and keep failures/empty/incomplete responses out of history.
+- Add offline tests for request shape, model restoration, validation, and errors.
+- Live API validation, responsive requests, and safer persistence remain pending.
+
 # Unreleased cleanup
 
 - Repair install metadata, runtime dependencies, and GUI launch commands.

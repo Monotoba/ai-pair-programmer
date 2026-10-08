@@ -8,14 +8,14 @@
 An experimental PyQt5 desktop assistant for asking programming questions,
 viewing responses, and browsing local query history.
 
-**Work in progress:** this 2023 prototype uses the legacy OpenAI SDK and
-Completion API with a historical model list. Live API functionality has not
-been validated. Do not treat this as a ready-to-use coding assistant yet.
-The current cleanup establishes installation and offline regression tests.
+**Work in progress:** the OpenAI integration uses the Responses API and an
+editable model ID. Request/response behavior is covered by offline tests, but
+live API functionality has not been validated. Responsive requests and safer
+persistence remain release blockers.
 
 ## What is implemented
 
-- Query and response text panes with model selection.
+- Query and response text panes with a saved, editable model ID.
 - Local history with previous/next navigation.
 - API-key configuration and saved settings.
 - Clear text without deleting history.
@@ -42,6 +42,19 @@ python -m aipairprogrammer
 The installed `ai-pair-programmer` command and `python main.py` also launch
 the app. Opening the GUI does not send a request; clicking Send does.
 
+## API configuration
+
+Enter a Responses-compatible model ID available to your API account in the
+editable model field. No model is chosen automatically; existing saved IDs
+are preserved, so replace any historical ID before sending a request.
+
+Prefer setting `OPENAI_API_KEY` in the process environment. It takes precedence
+over a key entered in **Config** and is not copied into the settings file.
+The SDK is explicitly directed to `https://api.openai.com/v1`; this app does
+not support custom API endpoints. Sending a query may incur API charges.
+Requests set `store=False`; this is not a guarantee of zero provider retention.
+Only completed, non-empty text responses are added to local history.
+
 ## Data and limitations
 
 Settings and `history.dat` are stored in the working directory. The API key
@@ -50,8 +63,8 @@ in history. These files are ignored by Git. Only load your own history file:
 the legacy pickle format is unsafe for untrusted files.
 
 Requests run synchronously and may freeze the UI while waiting. History
-contains independent queries, not conversational sessions. The model picker
-and API integration need modernization before live use. No live API request,
+contains independent queries, not conversational sessions. Requests use a
+30-second SDK timeout with automatic retries disabled. No live API request,
 billing, or model availability is exercised by the automated tests.
 
 See the [user guide](docs/USERGUIDE.md), [roadmap](docs/ROADMAP.md), and

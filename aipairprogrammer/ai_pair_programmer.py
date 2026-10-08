@@ -1,3 +1,5 @@
+import os
+
 import openai
 from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit, QPushButton, \
@@ -14,17 +16,7 @@ class AIPairProgrammer(QWidget):
         self.settings = AIPairProgrammerSettings()
         self.api_key = ''
         self.current_model = ''
-        self.models = {'Davinci': 'davinci',
-                       'Curie': 'curie',
-                       'Babbage': 'babbage',
-                       'Ada': 'ada',
-                       'Curie (001)': 'text-curie-001',
-                       'Babbage (001)': 'text-babbage-001',
-                       'Ada (001)': 'text-ada-001',
-                       'Davinci (Text)': 'text-davinci-003',
-                       'Davinci (Text/Sm)': 'text-davinci-002',
-                       }
-        self.model_keys = list(self.models.keys())
+        self._query_succeeded = False
         self.historian = QueryHistory()
         self.init_system()
         self.init_ui()
@@ -43,8 +35,13 @@ class AIPairProgrammer(QWidget):
         # ChatGPT Model Selection
         model_label = QLabel("Select a model:")
         self.model_combo_box = QComboBox()
-        self.model_combo_box.addItems(self.models)
-        self.model_combo_box.currentIndexChanged.connect(self.update_model)
+        self.model_combo_box.setEditable(True)
+        self.model_combo_box.setInsertPolicy(QComboBox.NoInsert)
+        self.model_combo_box.lineEdit().setPlaceholderText('Enter a model ID available to your API account')
+        if self.current_model:
+            self.model_combo_box.addItem(self.current_model)
+        self.model_combo_box.setCurrentText(self.current_model)
+        self.model_combo_box.currentTextChanged.connect(self.update_model)
 
         # ChatGPT Response Text
         self.response_label = QLabel("Response:")
@@ -98,8 +95,8 @@ class AIPairProgrammer(QWidget):
 
         self.setLayout(layout)
 
-    def update_model(self, index):
-        self.current_model = self.models[self.model_keys[index]]
+    def update_model(self, model_name):
+        self.current_model = model_name.strip()
         self.settings.model_name = self.current_model
         self.settings.save_state()
 
@@ -107,8 +104,9 @@ class AIPairProgrammer(QWidget):
         # Add history handling here
         query = self.query_edit.toPlainText()
         if query:
+            self._query_succeeded = False
             response_text = self.query_gpt(query)
-            if response_text:
+            if self._query_succeeded:
                 self.historian.add(query=query, response=response_text)
                 self.historian.save_history()
                 self.add_response_text(response_text)
@@ -118,32 +116,47 @@ class AIPairProgrammer(QWidget):
             self.response_edit.setPlainText("Please enter a query.")
 
     def query_gpt(self, query) -> str:
-        # Code to query OpenAI's API using self.api_key and self.current_model
-        # Returns the generated text response
-        if self.api_key and self.api_key != '<your api key here>':
-            openai.api_key = self.api_key
-        else:
+        self._query_succeeded = False
+        api_key = os.environ.get('OPENAI_API_KEY', '').strip() or self.api_key.strip()
+        if not api_key or api_key == '<your api key here>':
             return 'You must set your API key before querying the API.'
+        if not self.current_model.strip():
+            return 'Enter a model ID available to your OpenAI API account.'
+        if not query.strip():
+            return 'Please enter a query.'
 
-        # Make Query Request
         try:
-
-            response = openai.Completion.create(
-                model=self.current_model,
-                prompt=query,
-                temperature=0.5,
-                max_tokens=60,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0,
-            )
-            if response.choices:
-                response_text = response.choices[0]['text']
-                return response_text
-            else:
-                return "Error"
-        except Exception as e:
-            return "Error: " + e.__str__()
+            # A per-request client avoids process-global key state and closes
+            # its transport even on errors. Do not retry paid requests silently.
+            with openai.OpenAI(api_key=api_key, timeout=30.0, max_retries=0,
+                               base_url='https://api.openai.com/v1') as client:
+                response = client.responses.create(
+                    model=self.current_model.strip(),
+                    input=query,
+                    store=False,
+                )
+            if response.status == 'incomplete':
+                return 'Error: The response was incomplete. Try a shorter request.'
+            if response.status != 'completed':
+                return 'Error: The API did not complete the response.'
+            response_text = response.output_text
+            if not response_text or not response_text.strip():
+                return 'Error: The API returned no text response.'
+            self._query_succeeded = True
+            return response_text
+        except openai.AuthenticationError:
+            return 'Error: Authentication failed. Check your API key.'
+        except openai.RateLimitError:
+            return 'Error: Rate or quota limit reached. Check your API account.'
+        except openai.APITimeoutError:
+            return 'Error: The API request timed out. Try again later.'
+        except openai.APIConnectionError:
+            return 'Error: Could not connect to OpenAI. Check your connection.'
+        except openai.APIStatusError:
+            return 'Error: The API rejected the request. Check the model ID and account access.'
+        except Exception:
+            # Provider error bodies may contain prompt content or credentials.
+            return 'Error: The request failed unexpectedly.'
 
     def add_response_text(self, new_text: str = ''):
         curr_text = self.response_edit.toPlainText()
