@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
+from pathlib import Path
 
 import pytest
 
@@ -36,7 +36,7 @@ def test_load_state(settings):
     # Now load the settings from the example file
     settings.load_state()
     # query changes
-    assert settings.api_key == "<your api key here>"
+    assert settings.api_key == ""
     assert settings.model_name == ""
 
 
@@ -65,7 +65,8 @@ def test_save_and_reload(settings):
     settings.save_state()
     restored = AIPairProgrammerSettings(settings.filename)
     restored.load_state()
-    assert restored.api_key == 'test-key'
+    assert restored.api_key == ''
+    assert 'test-key' not in Path(settings.filename).read_text()
     assert restored.model_name == 'curie'
 
 

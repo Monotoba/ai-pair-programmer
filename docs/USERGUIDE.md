@@ -15,19 +15,59 @@ the two text panes without removing history.
 The model field accepts a Responses-compatible model ID available to your
 API account. The app starts with no model selected unless one was saved.
 Saved historical IDs remain visible and must be replaced before use. **Config**
-opens the API-key dialog, which masks the key on screen but saves it in plain
-text in `settings.ini` in the current directory. The model setting is saved and restored on startup. An `OPENAI_API_KEY`
+opens the API-key dialog, which masks the key on screen and keeps it in memory
+for the current session only. The model setting is saved and restored on startup. An `OPENAI_API_KEY`
 environment variable takes precedence over a configured key and is never
 copied into the settings file. Requests go to the official OpenAI endpoint.
 
 ## Local files
 
-- `settings.ini`: API key and model name.
-- `history.dat`: queries, responses, and timestamps in legacy pickle format.
+- `settings.ini`: model name only; API keys are never saved by this version.
+- `history.json`: validated version-1 JSON containing queries, responses, and timestamps.
 
-Do not share these files or open a history file supplied by another person.
+Default directory:
+
+| Platform | Directory |
+| --- | --- |
+| Linux | `$XDG_DATA_HOME/ai-pair-programmer`, or `~/.local/share/ai-pair-programmer` |
+| macOS | `~/Library/Application Support/ai-pair-programmer` |
+| Windows | `%LOCALAPPDATA%\ai-pair-programmer` |
+
+Set `AIPAIRPROGRAMMER_DATA_DIR` to override the directory. Avoid shared folders.
+On Unix, new files use owner-only permissions and newly created data directories
+use owner-only access. Windows access follows the directory's ACLs.
+Do not share history: it contains your questions and responses.
 The app loads history on startup and saves it after responses and on normal
-exit. History has no conversation sessions or search yet.
+exit. Writes replace the destination atomically. A read failure blocks saving
+to preserve the original file; move it aside or repair it, then restart.
+History has no conversation sessions or search yet.
+
+## Upgrading from legacy storage
+
+The old working-directory `settings.ini` and `history.dat` are left untouched.
+They are not loaded automatically. Re-enter your model ID and configure
+`OPENAI_API_KEY` or enter a session key in **Config**. The old settings file may
+still contain a plaintext key; remove that key yourself once you have moved it
+to your chosen configuration method. No backup containing the key is created.
+
+Pickle history is no longer loaded, including when supplied as a custom path.
+There is no automatic pickle converter in this version because loading pickle
+can execute code. Keep your old file if you need its contents; do not unpickle
+files from other people. You can manually copy existing text into the following
+JSON structure in the new data directory, with the app closed:
+
+```json
+{
+  "version": 1,
+  "items": [
+    {"date": "2026-10-08 12:00:00", "query": "Your question", "response": "Your answer"}
+  ]
+}
+```
+
+All three item fields must be strings. Invalid JSON, unknown versions, and
+invalid items produce a history error without overwriting the file. Keep a
+copy of existing JSON before editing it.
 
 ## Development
 

@@ -1,11 +1,14 @@
-import os
+from io import StringIO
+from pathlib import Path
+
+from .persistence import atomic_write, data_directory
 from configparser import ConfigParser
 
 
 class AIPairProgrammerSettings:
-    def __init__(self, filename: str = 'settings.ini'):
-        self.filename = filename
-        self.config = ConfigParser()
+    def __init__(self, filename=None):
+        self.filename = filename if filename is not None else data_directory() / 'settings.ini'
+        self.config = ConfigParser(interpolation=None)
         self._api_key = ""
         self._model_name = ""
 
@@ -16,28 +19,23 @@ class AIPairProgrammerSettings:
         return self
 
     def load_state(self):
-        # Set some defaults in case file doesn't exist
-        self.config['api'] = {'key': '<your api key here>'}
+        self.config = ConfigParser(interpolation=None)
         self.config['model'] = {'name': ''}
-
-        if os.path.isfile(self.filename):
-            # Read the settings file
-            self.config.read(self.filename)
-        else:
-            # No settings file exists, So create a new settings file with default values
-            with open(self.filename, 'w') as ofh:
-                self.config.write(ofh)
-        # Retrieve the settings
-        self._api_key = self.config.get(section='api', option='key')
-        self._model_name = self.config.get(section='model', option='name')
+        if Path(self.filename).is_file():
+            self.config.read(self.filename, encoding='utf-8')
+        self._api_key = ''
+        self._model_name = self.config.get('model', 'name', fallback='')
+        # Explicitly supplied legacy files may contain a key. Never use or rewrite
+        # that secret automatically; saving settings removes the old key section.
+        if not Path(self.filename).exists():
+            self.save_state()
 
     def save_state(self):
-        self.config['api'] = {'key': self._api_key}
+        self.config = ConfigParser(interpolation=None)
         self.config['model'] = {'name': self._model_name}
-        # self.config.set(section='api', option='api_key', value=self.api_key)
-        # self.config.set(section='model', option='name', value=self.model_name)
-        with open(self.filename, 'w') as ofh:
-            self.config.write(ofh)
+        output = StringIO()
+        self.config.write(output)
+        atomic_write(self.filename, output.getvalue())
 
     @property
     def api_key(self):

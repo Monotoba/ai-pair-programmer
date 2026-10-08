@@ -164,9 +164,11 @@ class AIPairProgrammer(QWidget):
             return
         if succeeded:
             self.historian.add(query=self._request.query, response=text)
-            self.historian.save_history()
+            saved = self.save_history()
         self.add_response_text(text)
-        self.request_status.setText('Response received' if succeeded else 'Request failed')
+        self.request_status.setText(
+            ('Response received' if saved else 'Response received; history not saved')
+            if succeeded else 'Request failed')
 
     def cancel_request(self):
         if self._request is not None:
@@ -247,8 +249,8 @@ class AIPairProgrammer(QWidget):
         # Show current API Key dialog
         dialog = CustomDialog(title='API configuration',
                               prompt='Enter your OpenAI API key:',
-                              placeholderText=self.api_key,
-                              noteText='The key is stored locally in settings.ini as plain text.')
+                              placeholderText='Session API key',
+                              noteText='The key is used for this session only. Use OPENAI_API_KEY for future launches.')
         dialog.input_field.setEchoMode(QLineEdit.Password)
         # dialog.setTextValue('This is a test')
         ok = dialog.exec()
@@ -260,7 +262,15 @@ class AIPairProgrammer(QWidget):
             self.api_key = api_key
 
     def load_history(self):
-        self.historian.load_history()
+        try:
+            self.historian.load_history()
+        except (OSError, ValueError, UnicodeError):
+            self.request_status.setText('History could not be read; file preserved and saving blocked.')
 
     def save_history(self):
-        self.historian.save_history()
+        try:
+            self.historian.save_history()
+            return True
+        except (OSError, ValueError, UnicodeError):
+            self.request_status.setText('History could not be saved; check the data file and permissions.')
+            return False

@@ -14,10 +14,11 @@ Complete in this order:
    duplicate prevention, local result cancellation, and safe deferred closing
    with GUI regression tests. The SDK timeout remains in place; cancellation
    does not guarantee that provider processing or billing stops.
-4. **Persistence:** migrate pickle history to a validated JSON format, choose
-   a per-user data directory, and store API keys in an OS credential store or
-   accept an environment variable without writing the key to disk. Plan
-   compatibility with existing local files explicitly.
+4. **Persistence:** implemented validated JSON history, atomic writes,
+   per-user paths, session-only keys, and preservation of unreadable files.
+   Legacy files stay untouched and require explicit reconfiguration; automatic
+   pickle conversion is intentionally unavailable. Regression tests cover
+   invalid data, executable pickle rejection, write failures, and legacy files.
 5. **Alpha readiness:** perform desktop smoke tests, add a screenshot and
    troubleshooting notes, build and install the release wheel outside the
    checkout, and publish an alpha only after these checks are complete.
