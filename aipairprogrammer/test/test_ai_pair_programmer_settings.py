@@ -37,7 +37,7 @@ def test_load_state(settings):
     settings.load_state()
     # query changes
     assert settings.api_key == "<your api key here>"
-    assert settings.model_name == "davinci"
+    assert settings.model_name == ""
 
 
 def test_save_state(settings):
@@ -67,3 +67,11 @@ def test_save_and_reload(settings):
     restored.load_state()
     assert restored.api_key == 'test-key'
     assert restored.model_name == 'curie'
+
+
+def test_existing_model_is_preserved(settings):
+    settings.model_name = 'account-model'
+    settings.save_state()
+    restored = AIPairProgrammerSettings(settings.filename)
+    restored.load_state()
+    assert restored.model_name == 'account-model'

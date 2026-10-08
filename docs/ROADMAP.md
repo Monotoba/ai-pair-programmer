@@ -4,12 +4,12 @@ Complete in this order:
 
 1. **Offline baseline:** repair packaging, isolate tests, add CI, and fix
    missing-history startup and configured history paths. Implemented in this
-   cleanup; CI must pass before merge.
-2. **Current API integration:** replace the legacy Completion call and SDK,
-   support a configurable model, restore the selected model on startup,
-   handle empty responses and provider errors, and verify request/response
-   behavior with mocks. Validate any live request separately with an explicitly
-   configured test account.
+   cleanup; all six CI jobs passed before merge.
+2. **Current API integration:** implemented the Responses API, configurable
+   model ID with startup restoration, sanitized errors, and empty/incomplete
+   response handling with mocks. Environment keys are supported without
+   copying them into settings. Live validation remains pending and requires
+   an explicitly configured test account.
 3. **Responsive UI:** run requests off the GUI thread, prevent duplicate
    submissions, and implement timeouts/cancellation with GUI tests.
 4. **Persistence:** migrate pickle history to a validated JSON format, choose
@@ -21,4 +21,4 @@ Complete in this order:
    checkout, and publish an alpha only after these checks are complete.
 
 Session history, multiple providers, themes, and accessibility remain later
-improvements. The current cleanup is not an API modernization or a release.
+improvements. API modernization is implemented; this is not yet a release.

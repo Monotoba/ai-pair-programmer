@@ -18,7 +18,7 @@ class AIPairProgrammerSettings:
     def load_state(self):
         # Set some defaults in case file doesn't exist
         self.config['api'] = {'key': '<your api key here>'}
-        self.config['model'] = {'name': 'davinci'}
+        self.config['model'] = {'name': ''}
 
         if os.path.isfile(self.filename):
             # Read the settings file
