@@ -167,3 +167,5 @@ cython_debug/
 .secret/settings.ini
 history.dat
 /aipairprogrammer/test/historytest.txt
+
+history.json

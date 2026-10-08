@@ -5,3 +5,4 @@ import pytest
 def isolated_working_directory(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
+    monkeypatch.setenv('AIPAIRPROGRAMMER_DATA_DIR', str(tmp_path / 'app-data'))

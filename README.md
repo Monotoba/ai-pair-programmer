@@ -58,10 +58,17 @@ Only completed, non-empty text responses are added to local history.
 
 ## Data and limitations
 
-Settings and `history.dat` are stored in the working directory. The API key
-is stored in **plain text** in `settings.ini`; responses and queries are stored
-in history. These files are ignored by Git. Only load your own history file:
-the legacy pickle format is unsafe for untrusted files.
+Settings and validated JSON history are stored in a per-user data directory.
+Keys entered in **Config** are kept in memory for the current session only;
+`settings.ini` saves only the model ID. Queries and responses remain private
+local data in `history.json`. Writes use atomic replacement to protect existing
+files if a write fails. Unreadable history is preserved and saving is blocked.
+
+Existing working-directory `settings.ini` and pickle `history.dat` files are
+left untouched and are not imported automatically. Re-enter your model and
+set an environment or session key when upgrading. See the
+[user guide](docs/USERGUIDE.md#upgrading-from-legacy-storage) for paths and history
+migration limitations.
 
 Requests run in a worker thread so the interface remains responsive.
 Only one request may run at a time. **Cancel request** discards its eventual

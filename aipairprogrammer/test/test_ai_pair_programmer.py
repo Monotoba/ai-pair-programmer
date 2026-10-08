@@ -81,7 +81,7 @@ def test_environment_key_is_used_without_persistence(app, api, monkeypatch):
     assert calls[0][1]['api_key'] == 'environment-test-key'
     assert app.settings.api_key != 'environment-test-key'
     from pathlib import Path
-    assert 'environment-test-key' not in Path('settings.ini').read_text()
+    assert 'environment-test-key' not in Path(app.settings.filename).read_text()
 
 
 @pytest.mark.parametrize('query, model, expected', [
@@ -147,7 +147,8 @@ def test_config_masks_key_and_does_not_log_it(app, monkeypatch, capsys):
     class Dialog:
         input_field = Field()
         def __init__(self, **kwargs):
-            assert kwargs['placeholderText'] == 'private-test-key'
+            assert kwargs['placeholderText'] == 'Session API key'
+            assert 'private-test-key' not in str(kwargs)
         def exec(self):
             return QDialog.Rejected
     app.api_key = 'private-test-key'

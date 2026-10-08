@@ -1,5 +1,7 @@
 import datetime
-import pickle
+import json
+
+from .persistence import atomic_write, data_directory
 from pathlib import Path
 
 
@@ -11,10 +13,11 @@ class HistoryItem:
 
 
 class QueryHistory:
-    def __init__(self, filename="history.dat"):
+    def __init__(self, filename=None):
         self.history: list[HistoryItem] = []
         self.current_index = 0
-        self.history_filename = filename
+        self.history_filename = filename if filename is not None else data_directory() / 'history.json'
+        self._save_blocked = False
 
     def add(self, query: str, response: str):
         # Creates a HistoryItem and adds
@@ -94,14 +97,37 @@ class QueryHistory:
         self.current_index = 0
 
     def save_history(self):
-        with Path(self.history_filename).open('wb') as ofh:
-            pickle.dump(self.history, ofh)
+        if self._save_blocked:
+            raise ValueError('Existing history could not be read; saving is blocked.')
+        payload = {'version': 1, 'items': [
+            {'date': item.date, 'query': item.query, 'response': item.response}
+            for item in self.history
+        ]}
+        self._validate(payload)
+        atomic_write(self.history_filename, json.dumps(payload, ensure_ascii=False, indent=2))
+
+    @staticmethod
+    def _validate(payload):
+        if (not isinstance(payload, dict) or set(payload) != {'version', 'items'}
+                or type(payload['version']) is not int or payload['version'] != 1
+                or not isinstance(payload['items'], list)):
+            raise ValueError('Unsupported history format.')
+        items = []
+        for item in payload['items']:
+            if (not isinstance(item, dict) or set(item) != {'date', 'query', 'response'}
+                    or any(not isinstance(value, str) for value in item.values())):
+                raise ValueError('Invalid history item.')
+            items.append(HistoryItem(**item))
+        return items
 
     def load_history(self):
         filename = Path(self.history_filename)
+        self._save_blocked = True
         if filename.exists():
-            with filename.open('rb') as ifh:
-                self.history = pickle.load(ifh)
+            with filename.open('r', encoding='utf-8') as stream:
+                items = self._validate(json.load(stream))
         else:
-            self.history = []
+            items = []
+        self.history = items
         self.current_index = self.limit(self.current_index)
+        self._save_blocked = False

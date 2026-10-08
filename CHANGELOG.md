@@ -1,3 +1,13 @@
+# Unreleased safer persistence
+
+- Replace executable pickle history with validated versioned JSON.
+- Move settings/history to per-user paths, with an optional directory override.
+- Keep configured API keys in memory only and remove secret-bearing placeholders.
+- Write files atomically; preserve unreadable history and block overwriting it.
+- Leave legacy working-directory files untouched; document upgrade limitations.
+- Add offline security, corruption, write-failure, and compatibility tests.
+- Live account and desktop release validation remain pending.
+
 # Unreleased responsive requests
 
 - Move blocking API calls to a Qt worker thread with immutable request inputs.
