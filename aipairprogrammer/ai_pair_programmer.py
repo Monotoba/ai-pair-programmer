@@ -1,7 +1,7 @@
 import openai
 from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit, QPushButton, \
-    QDialog, QComboBox
+    QDialog, QComboBox, QLineEdit
 
 from aipairprogrammer.ai_pair_programmer_settings import AIPairProgrammerSettings
 from aipairprogrammer.qt_custom_dialog import CustomDialog
@@ -120,11 +120,10 @@ class AIPairProgrammer(QWidget):
     def query_gpt(self, query) -> str:
         # Code to query OpenAI's API using self.api_key and self.current_model
         # Returns the generated text response
-        if self.api_key:
+        if self.api_key and self.api_key != '<your api key here>':
             openai.api_key = self.api_key
         else:
-            new_text = 'You must set your API key before querying ChatGPT!'
-            self.add_response_text(new_text)
+            return 'You must set your API key before querying the API.'
 
         # Make Query Request
         try:
@@ -138,7 +137,6 @@ class AIPairProgrammer(QWidget):
                 frequency_penalty=0.0,
                 presence_penalty=0.0,
             )
-            print(f"Response: {response['choices'][0]['text']}")
             if response.choices:
                 response_text = response.choices[0]['text']
                 return response_text
@@ -149,7 +147,6 @@ class AIPairProgrammer(QWidget):
 
     def add_response_text(self, new_text: str = ''):
         curr_text = self.response_edit.toPlainText()
-        print(f"Current text: {curr_text}")
         if curr_text and new_text:
             update_text = curr_text + new_text + '\n\n'
         else:
@@ -185,11 +182,11 @@ class AIPairProgrammer(QWidget):
 
     def show_config_dialog(self):
         # Show current API Key dialog
-        dialog = CustomDialog(title='Custom Dialog',
-                              prompt='Enter some text:',
+        dialog = CustomDialog(title='API configuration',
+                              prompt='Enter your OpenAI API key:',
                               placeholderText=self.api_key,
-                              noteText='You can get an api key at: http://openia.com/signup')  # QInputDialog()
-        print(f"API Key: {self.api_key}")
+                              noteText='The key is stored locally in settings.ini as plain text.')
+        dialog.input_field.setEchoMode(QLineEdit.Password)
         # dialog.setTextValue('This is a test')
         ok = dialog.exec()
         if ok == QDialog.Accepted:

@@ -6,10 +6,10 @@ from aipairprogrammer.query_history import QueryHistory, HistoryItem
 
 
 @pytest.fixture()
-def history():
+def history(tmp_path):
     #cwd = os.getcwd()
     #filename = f"{cwd}/historytest.txt"
-    filename = '/historytest.txt'
+    filename = str(tmp_path / 'historytest.dat')
     hist = QueryHistory(filename=filename)
     return hist
 
@@ -32,20 +32,12 @@ def test_history_item(history):
 
 
 def test_add(history):
-    date = '2022-03-12'
-    query = 'Can a cat walk?'
-    response = 'A cat can walk on four feet'
-    history.add(date=date, query=query, response=response)
-    item = history.last()
-    assert item.date == date
-    assert item.query == query
-    assert item.response == response
-    date = '2022-06-21'
-    query = 'What is a credenza'
-    response = 'A credenza is a dining room sideboard.'
-    assert item.date == date
-    assert item.query == query
-    assert item.response == response
+    history.add(query='First', response='One')
+    history.add(query='Second', response='Two')
+    assert history.count() == 2
+    assert history.first().query == 'First'
+    assert history.last().response == 'Two'
+    assert history.first().date
 
 
 def test_add_item(history):
@@ -68,7 +60,7 @@ def test_count(history):
     date = '2023-02-07'
     query = 'Tell me about the current weather conditions in Omaha'
     response = 'It is currently 66 degrees F and clear in Omaha Ne, USA'
-    history.add(date=date, query=query, response=response)
+    history.add(query=query, response=response)
     num = 1
     cnt = history.count()
     assert cnt == num
@@ -235,3 +227,24 @@ def test_clear(history):
     history.clear()
     cnt = history.count()
     assert cnt == 0
+
+
+def test_missing_history_can_accept_new_items(history):
+    history.load_history()
+    assert history.history == []
+    history.add('New query', 'New response')
+    assert history.count() == 1
+
+
+def test_history_round_trip_uses_requested_path(history):
+    history.add('Question', 'Answer')
+    history.save_history()
+    restored = QueryHistory(history.history_filename)
+    restored.load_history()
+    assert restored.first().query == 'Question'
+    assert restored.first().response == 'Answer'
+
+
+def test_empty_navigation(history):
+    for operation in (history.first, history.last, history.next, history.prev):
+        assert operation() is None
