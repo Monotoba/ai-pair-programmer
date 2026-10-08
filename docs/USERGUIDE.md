@@ -95,3 +95,35 @@ cancels locally and defers closing until the worker exits safely. The SDK
 timeout bounds individual network waits, not an absolute total runtime. Sending
 queries may incur API charges. `store=False` disables response storage for
 this request but is not a promise of zero provider retention.
+
+## Troubleshooting
+
+- **The GUI does not start:** activate the virtual environment and run
+  `python -m aipairprogrammer` from a terminal. Include the sanitized error and
+  your OS/Python versions in a bug report. A graphical desktop is required;
+  offscreen rendering is for automated checks, not normal use.
+- **Qt reports an xcb/platform plugin error on Linux:** check that the desktop's
+  Qt platform libraries are installed. Do not copy random plugin files into
+  the environment. A successful offscreen test does not prove that the native
+  desktop plugin is available.
+- **Authentication fails:** check the API key available to the launched process.
+  `OPENAI_API_KEY` takes precedence over the session dialog. Restart the app
+  after changing the launching shell's environment. Never post the key.
+- **The model/request is rejected:** enter a Responses-compatible model ID
+  available to your account. This app does not list account models for you.
+- **History will not save:** check directory permissions and available disk
+  space. If history could not be read, move the file aside and restart; preserve
+  a copy before attempting repairs. `AIPAIRPROGRAMMER_DATA_DIR` can select a
+  writable private directory before launch.
+- **Send stays disabled after cancellation:** the worker must finish before
+  another request starts. Cancellation only discards the result locally.
+
+For a reproducible, credential-free preview after installing the checkout:
+
+```sh
+QT_QPA_PLATFORM=offscreen python scripts/preview.py --output docs/images/desktop-preview.png
+```
+
+In PowerShell set `$env:QT_QPA_PLATFORM = "offscreen"` first, then run the Python
+command. The preview isolates its temporary settings, uses sample text, and
+never sends an API request. It does not validate a live model or API account.

@@ -2,6 +2,7 @@
 
 [![Tests](https://github.com/Monotoba/ai-pair-programmer/actions/workflows/tests.yml/badge.svg)](https://github.com/Monotoba/ai-pair-programmer/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![GUI](https://img.shields.io/badge/GUI-PyQt5-green)
 ![Status](https://img.shields.io/badge/status-work%20in%20progress-orange)
 [![License](https://img.shields.io/badge/license-BSD--2--Clause-blue)](LICENSE.md)
 
@@ -10,16 +11,24 @@ viewing responses, and browsing local query history.
 
 **Work in progress:** the OpenAI integration uses the Responses API and an
 editable model ID. Request/response behavior is covered by offline tests, but
-live API functionality has not been validated. Safer persistence and desktop
-release validation remain pending.
+live API functionality has not been validated. JSON history and session-only
+keys are implemented. The `0.1.0a1` alpha candidate has offline Qt and package
+validation; interactive desktop checks remain pending.
 
 ## What is implemented
 
 - Query and response text panes with a saved, editable model ID.
 - Local history with previous/next navigation.
-- API-key configuration and saved settings.
+- Session-only API-key configuration and saved model settings.
 - Clear text without deleting history.
 - Background requests, duplicate-submission protection, and local cancellation.
+
+## Desktop preview
+
+![AI Pair Programmer desktop preview with sample text](docs/images/desktop-preview.png)
+
+This is the actual Qt interface rendered offscreen with sample text. No API
+request was sent. The disabled Send button is specific to the preview script.
 
 ## Developer quick start
 

@@ -20,9 +20,11 @@ class CustomDialog(QDialog):
         font.setPointSize(10)
         note_label = QLabel(noteText, self)
         note_label.setFont(font)
+        note_label.setWordWrap(True)
 
-        # Create a QLineEdit widget with some initial text
-        self.input_field = QLineEdit(placeholderText, self)
+        # Placeholder hints must not become submitted input.
+        self.input_field = QLineEdit(self)
+        self.input_field.setPlaceholderText(placeholderText)
 
         # Create a QPushButton to close the dialog and return the text
         ok_button = QPushButton('OK', self)

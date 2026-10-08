@@ -24,3 +24,8 @@ Add a regression test for every code change. Keep pull requests focused and
 follow the ordered [roadmap](docs/ROADMAP.md). Include reproduction steps,
 OS/Python versions, and sanitized error messages in issues; omit keys and
 private queries. No PyPI publication is planned in this cleanup.
+
+The safe screenshot script is `scripts/preview.py`. After installing the
+checkout, run it with `QT_QPA_PLATFORM=offscreen`; it uses labeled sample text
+and isolated temporary settings, without making an API request. Keep preview
+claims separate from live/API or native desktop validation.
