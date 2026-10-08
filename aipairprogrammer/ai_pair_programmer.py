@@ -1,6 +1,6 @@
 import os
 
-import openai
+from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit, QPushButton, \
     QDialog, QComboBox, QLineEdit
@@ -8,6 +8,27 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit
 from aipairprogrammer.ai_pair_programmer_settings import AIPairProgrammerSettings
 from aipairprogrammer.qt_custom_dialog import CustomDialog
 from aipairprogrammer.query_history import QueryHistory
+from aipairprogrammer.api_client import execute_query
+
+
+class QueryWorker(QThread):
+    result_ready = pyqtSignal(str, bool)
+
+    def __init__(self, query, model, api_key, parent=None):
+        super().__init__(parent)
+        self.query = query
+        self.model = model
+        self.api_key = api_key
+
+    def run(self):
+        if self.isInterruptionRequested():
+            return
+        try:
+            text, succeeded = execute_query(self.query, self.model, self.api_key)
+        except Exception:
+            text, succeeded = 'Error: The request failed unexpectedly.', False
+        if not self.isInterruptionRequested():
+            self.result_ready.emit(text, succeeded)
 
 
 class AIPairProgrammer(QWidget):
@@ -17,6 +38,9 @@ class AIPairProgrammer(QWidget):
         self.api_key = ''
         self.current_model = ''
         self._query_succeeded = False
+        self._request = None
+        self._request_cancelled = False
+        self._close_when_finished = False
         self.historian = QueryHistory()
         self.init_system()
         self.init_ui()
@@ -50,14 +74,19 @@ class AIPairProgrammer(QWidget):
 
         # Bottom Button Bar
         button_layout = QHBoxLayout()
-        send_button = QPushButton("Send")
-        send_button.clicked.connect(self.send_query)
+        self.send_button = QPushButton("Send")
+        self.send_button.clicked.connect(self.send_query)
+
+        self.cancel_button = QPushButton("Cancel request")
+        self.cancel_button.setEnabled(False)
+        self.cancel_button.clicked.connect(self.cancel_request)
+        self.request_status = QLabel("Ready")
 
         clear_button = QPushButton("Clear Text")
         clear_button.clicked.connect(self.clear_text)
 
-        config_button = QPushButton("Config")
-        config_button.clicked.connect(self.show_config_dialog)
+        self.config_button = QPushButton("Config")
+        self.config_button.clicked.connect(self.show_config_dialog)
 
         # History
         history_layout = QHBoxLayout()
@@ -88,9 +117,11 @@ class AIPairProgrammer(QWidget):
         layout.addWidget(query_label)
         layout.addWidget(self.query_edit)
 
-        button_layout.addWidget(send_button)
+        layout.addWidget(self.request_status)
+        button_layout.addWidget(self.send_button)
+        button_layout.addWidget(self.cancel_button)
         button_layout.addWidget(clear_button)
-        button_layout.addWidget(config_button)
+        button_layout.addWidget(self.config_button)
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
@@ -100,63 +131,82 @@ class AIPairProgrammer(QWidget):
         self.settings.model_name = self.current_model
         self.settings.save_state()
 
-    def send_query(self):
-        # Add history handling here
-        query = self.query_edit.toPlainText()
-        if query:
-            self._query_succeeded = False
-            response_text = self.query_gpt(query)
-            if self._query_succeeded:
-                self.historian.add(query=query, response=response_text)
-                self.historian.save_history()
-                self.add_response_text(response_text)
-            else:
-                self.add_response_text(response_text)
-        else:
-            self.response_edit.setPlainText("Please enter a query.")
-
-    def query_gpt(self, query) -> str:
-        self._query_succeeded = False
+    def _request_inputs(self, query):
         api_key = os.environ.get('OPENAI_API_KEY', '').strip() or self.api_key.strip()
         if not api_key or api_key == '<your api key here>':
-            return 'You must set your API key before querying the API.'
+            return None, 'You must set your API key before querying the API.'
         if not self.current_model.strip():
-            return 'Enter a model ID available to your OpenAI API account.'
+            return None, 'Enter a model ID available to your OpenAI API account.'
         if not query.strip():
-            return 'Please enter a query.'
+            return None, 'Please enter a query.'
+        return (query, self.current_model.strip(), api_key), None
 
-        try:
-            # A per-request client avoids process-global key state and closes
-            # its transport even on errors. Do not retry paid requests silently.
-            with openai.OpenAI(api_key=api_key, timeout=30.0, max_retries=0,
-                               base_url='https://api.openai.com/v1') as client:
-                response = client.responses.create(
-                    model=self.current_model.strip(),
-                    input=query,
-                    store=False,
-                )
-            if response.status == 'incomplete':
-                return 'Error: The response was incomplete. Try a shorter request.'
-            if response.status != 'completed':
-                return 'Error: The API did not complete the response.'
-            response_text = response.output_text
-            if not response_text or not response_text.strip():
-                return 'Error: The API returned no text response.'
-            self._query_succeeded = True
-            return response_text
-        except openai.AuthenticationError:
-            return 'Error: Authentication failed. Check your API key.'
-        except openai.RateLimitError:
-            return 'Error: Rate or quota limit reached. Check your API account.'
-        except openai.APITimeoutError:
-            return 'Error: The API request timed out. Try again later.'
-        except openai.APIConnectionError:
-            return 'Error: Could not connect to OpenAI. Check your connection.'
-        except openai.APIStatusError:
-            return 'Error: The API rejected the request. Check the model ID and account access.'
-        except Exception:
-            # Provider error bodies may contain prompt content or credentials.
-            return 'Error: The request failed unexpectedly.'
+    def send_query(self):
+        if self._request is not None:
+            return
+        inputs, error = self._request_inputs(self.query_edit.toPlainText())
+        if error:
+            self.add_response_text(error)
+            return
+        self._request_cancelled = False
+        self._request = QueryWorker(*inputs, parent=self)
+        self._request.result_ready.connect(self._receive_result)
+        self._request.finished.connect(self._request_finished)
+        self.send_button.setEnabled(False)
+        self.config_button.setEnabled(False)
+        self.model_combo_box.setEnabled(False)
+        self.cancel_button.setEnabled(True)
+        self.request_status.setText('Waiting for response…')
+        self._request.start()
+
+    def _receive_result(self, text, succeeded):
+        if self._request is None or self._request_cancelled:
+            return
+        if succeeded:
+            self.historian.add(query=self._request.query, response=text)
+            self.historian.save_history()
+        self.add_response_text(text)
+        self.request_status.setText('Response received' if succeeded else 'Request failed')
+
+    def cancel_request(self):
+        if self._request is not None:
+            self._request_cancelled = True
+            self._request.requestInterruption()
+            self.cancel_button.setEnabled(False)
+            self.request_status.setText('Cancelling locally; waiting for the request to finish…')
+
+    def _request_finished(self):
+        worker = self._request
+        cancelled = self._request_cancelled
+        self._request = None
+        worker.deleteLater()
+        self.send_button.setEnabled(True)
+        self.config_button.setEnabled(True)
+        self.model_combo_box.setEnabled(True)
+        self.cancel_button.setEnabled(False)
+        if cancelled:
+            self.request_status.setText('Request cancelled locally')
+        if self._close_when_finished:
+            self.close()
+
+    def closeEvent(self, event):
+        # Keep the widget/thread alive until blocking I/O finishes. Never
+        # terminate a thread while it may be using the SDK transport.
+        if self._request is not None:
+            self._close_when_finished = True
+            self.cancel_request()
+            event.ignore()
+        else:
+            super().closeEvent(event)
+
+    def query_gpt(self, query) -> str:
+        """Synchronous compatibility helper for scripts and offline tests."""
+        self._query_succeeded = False
+        inputs, error = self._request_inputs(query)
+        if error:
+            return error
+        text, self._query_succeeded = execute_query(*inputs)
+        return text
 
     def add_response_text(self, new_text: str = ''):
         curr_text = self.response_edit.toPlainText()

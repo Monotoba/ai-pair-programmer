@@ -10,8 +10,8 @@ viewing responses, and browsing local query history.
 
 **Work in progress:** the OpenAI integration uses the Responses API and an
 editable model ID. Request/response behavior is covered by offline tests, but
-live API functionality has not been validated. Responsive requests and safer
-persistence remain release blockers.
+live API functionality has not been validated. Safer persistence and desktop
+release validation remain pending.
 
 ## What is implemented
 
@@ -19,6 +19,7 @@ persistence remain release blockers.
 - Local history with previous/next navigation.
 - API-key configuration and saved settings.
 - Clear text without deleting history.
+- Background requests, duplicate-submission protection, and local cancellation.
 
 ## Developer quick start
 
@@ -62,8 +63,12 @@ is stored in **plain text** in `settings.ini`; responses and queries are stored
 in history. These files are ignored by Git. Only load your own history file:
 the legacy pickle format is unsafe for untrusted files.
 
-Requests run synchronously and may freeze the UI while waiting. History
-contains independent queries, not conversational sessions. Requests use a
+Requests run in a worker thread so the interface remains responsive.
+Only one request may run at a time. **Cancel request** discards its eventual
+result locally; it does not guarantee cancellation at OpenAI or avoid charges.
+Send stays disabled until the request finishes, and closing the window waits
+for the worker to finish safely. History contains independent queries, not
+conversational sessions. Requests use a
 30-second SDK timeout with automatic retries disabled. No live API request,
 billing, or model availability is exercised by the automated tests.
 

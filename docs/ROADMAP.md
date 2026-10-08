@@ -10,8 +10,10 @@ Complete in this order:
    response handling with mocks. Environment keys are supported without
    copying them into settings. Live validation remains pending and requires
    an explicitly configured test account.
-3. **Responsive UI:** run requests off the GUI thread, prevent duplicate
-   submissions, and implement timeouts/cancellation with GUI tests.
+3. **Responsive UI:** implemented worker-thread requests, submission snapshots,
+   duplicate prevention, local result cancellation, and safe deferred closing
+   with GUI regression tests. The SDK timeout remains in place; cancellation
+   does not guarantee that provider processing or billing stops.
 4. **Persistence:** migrate pickle history to a validated JSON format, choose
    a per-user data directory, and store API keys in an OS credential store or
    accept an environment variable without writing the key to disk. Plan
