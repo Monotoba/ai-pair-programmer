@@ -34,6 +34,8 @@ class QueryWorker(QThread):
 class AIPairProgrammer(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('AI Pair Programmer')
+        self.resize(760, 560)
         self.settings = AIPairProgrammerSettings()
         self.api_key = ''
         self.current_model = ''

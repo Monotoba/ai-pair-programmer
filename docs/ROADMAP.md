@@ -19,9 +19,11 @@ Complete in this order:
    Legacy files stay untouched and require explicit reconfiguration; automatic
    pickle conversion is intentionally unavailable. Regression tests cover
    invalid data, executable pickle rejection, write failures, and legacy files.
-5. **Alpha readiness:** perform desktop smoke tests, add a screenshot and
-   troubleshooting notes, build and install the release wheel outside the
-   checkout, and publish an alpha only after these checks are complete.
+5. **Alpha readiness:** `0.1.0a1` candidate prepared with an actual offscreen Qt
+   preview, troubleshooting notes, regression tests, and an installed-wheel
+   smoke test outside the checkout. Interactive desktop and live-account
+   validation remain pending. See [release checks](RELEASE_CHECKLIST.md); an
+   alpha must clearly disclose these limits.
 
 Session history, multiple providers, themes, and accessibility remain later
 improvements. API modernization is implemented; this is not yet a release.
