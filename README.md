@@ -3,7 +3,8 @@
 [![Tests](https://github.com/Monotoba/ai-pair-programmer/actions/workflows/tests.yml/badge.svg)](https://github.com/Monotoba/ai-pair-programmer/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![GUI](https://img.shields.io/badge/GUI-PyQt5-green)
-![Status](https://img.shields.io/badge/status-work%20in%20progress-orange)
+![Status](https://img.shields.io/badge/status-experimental%20alpha-orange)
+[![Release](https://img.shields.io/badge/release-v0.1.0a1-orange)](https://github.com/Monotoba/ai-pair-programmer/releases/tag/v0.1.0a1)
 [![License](https://img.shields.io/badge/license-BSD--2--Clause-blue)](LICENSE.md)
 
 An experimental PyQt5 desktop assistant for asking programming questions,
@@ -12,7 +13,7 @@ viewing responses, and browsing local query history.
 **Work in progress:** the OpenAI integration uses the Responses API and an
 editable model ID. Request/response behavior is covered by offline tests, but
 live API functionality has not been validated. JSON history and session-only
-keys are implemented. The `0.1.0a1` alpha candidate has offline Qt and package
+keys are implemented. The published `0.1.0a1` experimental alpha has offline Qt and package
 validation; interactive desktop checks remain pending.
 
 ## What is implemented
@@ -29,6 +30,19 @@ validation; interactive desktop checks remain pending.
 
 This is the actual Qt interface rendered offscreen with sample text. No API
 request was sent. The disabled Send button is specific to the preview script.
+
+## Install the alpha
+
+Download the wheel and `SHA256SUMS.txt` from the
+[0.1.0a1 prerelease](https://github.com/Monotoba/ai-pair-programmer/releases/tag/v0.1.0a1).
+Use Python 3.10+ in an activated virtual environment, then run:
+
+```sh
+python -m pip install aipairprogrammer-0.1.0a1-py3-none-any.whl
+python -m aipairprogrammer
+```
+
+This alpha is for testing and feedback. PyPI publication remains on hold.
 
 ## Developer quick start
 

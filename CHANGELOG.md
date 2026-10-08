@@ -1,10 +1,11 @@
-# 0.1.0a1 alpha candidate (not yet published)
+# 0.1.0a1 — 2026-10-08 (experimental alpha)
 
 - Fix API-key hints being submitted as actual dialog text; wrap dialog notes.
 - Give the application a title and a usable initial window size.
 - Add an isolated sample-data Qt preview and README screenshot.
 - Add dialog/key persistence/preview regression tests and troubleshooting notes.
-- Prepare alpha metadata and release checklist with validation limits stated.
+- Publish a GitHub prerelease with wheel, source archive, and SHA-256 checksums.
+- Include alpha metadata and release checklist with validation limits stated.
 - Live API and native interactive desktop checks remain pending.
 
 # Unreleased safer persistence
