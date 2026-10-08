@@ -99,17 +99,18 @@ def test_validation_never_calls_api(app, api, query, model, expected):
     ('completed', ''), ('completed', '  '), ('incomplete', 'partial'),
     ('failed', 'partial'),
 ])
-def test_unusable_response_is_not_saved(app, api, status, text):
+def test_unusable_response_is_not_saved(app, api, status, text, qtbot):
     _, response = api
     response.status = status
     response.output_text = text
     app.query_edit.setPlainText('Question')
     app.send_query()
+    qtbot.waitUntil(lambda: app._request is None)
     assert app.response_edit.toPlainText().startswith('Error:')
     assert app.historian.count() == 0
 
 
-def test_api_failure_is_displayable(app, monkeypatch):
+def test_api_failure_is_displayable(app, monkeypatch, qtbot):
     def fail(**kwargs):
         raise RuntimeError('private-test-key private prompt')
     monkeypatch.setattr('openai.OpenAI', fail)
@@ -117,14 +118,16 @@ def test_api_failure_is_displayable(app, monkeypatch):
     app.current_model = 'test-model'
     app.query_edit.setPlainText('Question')
     app.send_query()
+    qtbot.waitUntil(lambda: app._request is None)
     assert 'Error: The request failed unexpectedly.' in app.response_edit.toPlainText()
     assert 'private' not in app.response_edit.toPlainText()
     assert app.historian.count() == 0
 
 
-def test_send_query_saves_response(app, api):
+def test_send_query_saves_response(app, api, qtbot):
     app.query_edit.setPlainText('Question')
     app.send_query()
+    qtbot.waitUntil(lambda: app._request is None)
     assert app.historian.last().query == 'Question'
     assert app.historian.last().response == 'Mocked answer'
     assert 'Mocked answer' in app.response_edit.toPlainText()

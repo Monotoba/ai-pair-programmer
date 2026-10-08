@@ -43,7 +43,15 @@ failures show brief messages for authentication, quota/rate limits, timeouts,
 connection problems, and rejected requests. Provider error bodies are not
 displayed. Errors and incomplete/empty responses are not saved in history.
 
-The SDK uses a 30-second timeout and no automatic retries. Requests currently
-block the GUI thread; see the [roadmap](ROADMAP.md) for the next step. Sending
+The SDK uses a 30-second timeout and no automatic retries. Requests run in a
+worker thread. **Send**, model configuration, and key configuration stay
+disabled while the request runs; query editing, history navigation, and
+Clear Text remain available. The query/model/key are captured at submission.
+
+**Cancel request** discards the eventual response locally. It does not abort
+provider-side processing or guarantee that charges are avoided. Send remains
+disabled until the worker finishes. Closing the window during a request
+cancels locally and defers closing until the worker exits safely. The SDK
+timeout bounds individual network waits, not an absolute total runtime. Sending
 queries may incur API charges. `store=False` disables response storage for
 this request but is not a promise of zero provider retention.

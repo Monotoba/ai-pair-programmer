@@ -1,3 +1,13 @@
+# Unreleased responsive requests
+
+- Move blocking API calls to a Qt worker thread with immutable request inputs.
+- Prevent duplicate submissions and keep the GUI event loop responsive.
+- Add local cancellation that discards results without terminating threads.
+- Defer window closing until an active worker finishes safely.
+- Add offline GUI tests for responsiveness, cancellation, request snapshots,
+  duplicate prevention, error recovery, and closing during a request.
+- Safer persistence and live/desktop release validation remain pending.
+
 # Unreleased API modernization
 
 - Replace the legacy Completion API with a per-request Responses client.
